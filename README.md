@@ -3,8 +3,6 @@ Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp
 
 The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/orchestrator/blob/master/lib/runTask.js).
 
-# API
-
 ## run(callback, done)
 
 Run the callback with arguments after `callback`.
