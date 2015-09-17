@@ -1,0 +1,35 @@
+{
+  "name": "run-callback",
+  "version": "0.0.1",
+  "description": "Run async & sync callbacks",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "eslint . && tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoubin/run-callback.git"
+  },
+  "keywords": [
+    "async",
+    "callback"
+  ],
+  "author": "zoubin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zoubin/run-callback/issues"
+  },
+  "homepage": "https://github.com/zoubin/run-callback#readme",
+  "dependencies": {
+    "arrayify-slice": "^1.0.0",
+    "end-of-stream": "^1.1.0",
+    "stream-consume": "^0.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^1.4.3",
+    "tap": "^1.4.1"
+  }
+}
