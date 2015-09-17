@@ -3,15 +3,21 @@ Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp
 
 The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/orchestrator/blob/master/lib/runTask.js).
 
+# Usage
+
+```javascript
+var run = require('run-callback');
+```
+
 ## run(callback, done)
 
-Run the callback with arguments after `callback`.
+Run `callback` with arguments following `callback`.
 
 ### callback
 
 Type: `Function`
 
-`callback` can be asynchronous if it does one of the following:
+`callback` can be made asynchronous if it does one of the following:
 
 #### Return a promise
 
@@ -19,7 +25,7 @@ Type: `Function`
 var run = require('run-callback');
 
 run(
-  function (a, b, done) {
+  function (a, b) {
     return new Promise(function (rs) {
       rs(a + b);
     });
@@ -100,7 +106,7 @@ Signature: `done(err, val1, val2,...)`
 `done` will be called when `callback` finishes.
 
 Errors thrown when executing `callback` will be passed to `done` as the first argument,
-and the return value as the second.
+and the returned value as the second.
 
 ```javascript
 var run = require('run-callback');
@@ -127,11 +133,30 @@ and any fulfilled values as the second.
 #### Streamified
 `done` will be called when the returned stream ends (readable, transforms, duplex) or finishes (writable).
 
-Errors will be passed as the only arugment.
+Errors will be passed as the first arugment.
 
 #### Other
 
-`done` will be called when `callback` invokes the last argument with a possible error object and more values.
+`done` will be called when `callback` invokes the last argument (`next`) with a possible error object and more values.
 
-`done` will be called with the same arguments.
+`done` will be called with the same arguments with `next`.
+
+## run.bindAsync([ctx,]callback, arg1, arg2,...)
+
+### ctx
+
+Type: `Object`
+
+If specified, it will be used as the execution context of `callback`.
+
+### callback
+
+Type: `Function`, `String`
+
+If `String`, it should be a method name of `ctx`,
+and that method will be treated as the `callback`.
+
+### args
+
+The arguments following `callback` will be passed as arguments to `callback` when it is executed.
 
