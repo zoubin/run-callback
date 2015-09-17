@@ -1,6 +1,6 @@
 {
   "name": "run-callback",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Run async & sync callbacks",
   "main": "index.js",
   "directories": {
