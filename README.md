@@ -5,9 +5,7 @@ The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/
 
 # Usage
 
-```javascript
-var run = require('run-callback');
-```
+[![npm](https://nodei.co/npm/run-callback.png)](https://www.npmjs.com/package/run-callback)
 
 ## run(callback, done)
 
