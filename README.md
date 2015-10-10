@@ -1,74 +1,77 @@
 # run-callback
 Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp/blob/master/docs/API.md#fn).
 
+[![npm](https://nodei.co/npm/run-callback.png?downloads=true)](https://www.npmjs.org/package/run-callback)
+
+[![version](https://img.shields.io/npm/v/run-callback.svg)](https://www.npmjs.org/package/run-callback)
+[![status](https://travis-ci.org/zoubin/run-callback.svg?branch=master)](https://travis-ci.org/zoubin/run-callback)
+[![dependencies](https://david-dm.org/zoubin/run-callback.svg)](https://david-dm.org/zoubin/run-callback)
+[![devDependencies](https://david-dm.org/zoubin/run-callback/dev-status.svg)](https://david-dm.org/zoubin/run-callback#info=devDependencies)
+
 The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/orchestrator/blob/master/lib/runTask.js).
 
 # Usage
 
-[![npm](https://nodei.co/npm/run-callback.png)](https://www.npmjs.com/package/run-callback)
-
 ## run(callback, done)
 
-Run `callback` with arguments following `callback`.
+Run `callback`, and call `done` when it finishes
 
 ### callback
 
-Type: `Function`
+Type: `Function`, `Array`
 
 `callback` can be made asynchronous if it does one of the following:
 
 #### Return a promise
 
 ```javascript
-var run = require('run-callback');
+var run = require('run-callback')
 
 run(
-  function (a, b) {
+  [function (a, b) {
     return new Promise(function (rs) {
-      rs(a + b);
-    });
+      rs(a + b)
+    })
   },
-  2, 1,
+  2, 1],
   function (err, sum) {
-    console.log('Expected:', 3);
-    console.log('Actual:', sum);
+    console.log('Expected:', 3)
+    console.log('Actual:', sum)
   }
-);
+)
 
 ```
 
 #### Return a stream
 
 ```javascript
-var run = require('run-callback');
-var Stream = require('stream');
+var run = require('run-callback')
+var Stream = require('stream')
 
-var res = [];
+var res = []
 run(
-  function (a, b) {
-    var rs = Stream.Readable({ objectMode: true });
-    var data = [a, b];
+  [function (a, b) {
+    var rs = Stream.Readable({ objectMode: true })
+    var data = [a, b]
     rs._read = function () {
       if (data.length) {
-        this.push(data.pop());
+        this.push(data.pop())
       } else {
-        this.push(null);
+        this.push(null)
       }
-    };
+    }
     process.nextTick(function () {
       rs.on('data', function (d) {
-        res.push(d);
-      });
-    });
-    return rs;
-  },
-  1,
-  2,
-  function (err) {
-    console.log('Expected:', [2, 1]);
-    console.log('Actual:', res);
+        res.push(d)
+      })
+    })
+    return rs
+  }, 1, 2],
+  function () {
+    console.log('Expected:', [2, 1])
+    console.log('Actual:', res)
   }
-);
+)
 
 ```
 
@@ -77,20 +80,20 @@ run(
 That extra argument should be a function.
 
 ```javascript
-var run = require('run-callback');
+var run = require('run-callback')
 
 run(
-  function (a, b, done) {
+  [function (a, b, done) {
     process.nextTick(function () {
-      done(null, a + b, a - b);
-    });
+      done(null, a + b, a - b)
+    })
   },
-  2, 1,
+  2, 1],
   function (err, sum, diff) {
-    console.log('Expected:', 3, 1);
-    console.log('Actual:', sum, diff);
+    console.log('Expected:', 3, 1)
+    console.log('Actual:', sum, diff)
   }
-);
+)
 
 ```
 
@@ -107,18 +110,20 @@ Errors thrown when executing `callback` will be passed to `done` as the first ar
 and the returned value as the second.
 
 ```javascript
-var run = require('run-callback');
+var run = require('run-callback')
 
 run(
-  function (a, b) {
-    return a + b;
+  [function (a, b, done) {
+    process.nextTick(function () {
+      done(null, a + b, a - b)
+    })
   },
-  1, 2,
-  function (err, res) {
-    console.log('Expected:', 3);
-    console.log('Actual:', res);
+  2, 1],
+  function (err, sum, diff) {
+    console.log('Expected:', 3, 1)
+    console.log('Actual:', sum, diff)
   }
-);
+)
 
 ```
 
@@ -139,6 +144,7 @@ Errors will be passed as the first arugment.
 
 `done` will be called with the same arguments with `next`.
 
+## run.bind([ctx,]callback, arg1, arg2,...)
 ## run.bindAsync([ctx,]callback, arg1, arg2,...)
 
 ### ctx
