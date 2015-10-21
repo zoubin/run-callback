@@ -29,6 +29,16 @@ gulp.task('test', ['lint'], test)
 gulp.task('coverage',
   require('callback-sequence')(instrument, test, report)
 )
+gulp.task('upload-coverage', ['coverage'], function (cb) {
+  var handleReport = require('coveralls/lib/handleInput')
+  var fs = require('fs')
+  fs.readFile('./coverage/lcov.info', 'utf8', function (err, data) {
+    if (err) {
+      return cb(err)
+    }
+    handleReport(data, cb)
+  })
+})
 gulp.task('default', ['lint', 'coverage'])
 
 function instrument() {

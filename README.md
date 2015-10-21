@@ -5,6 +5,7 @@ Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp
 
 [![version](https://img.shields.io/npm/v/run-callback.svg)](https://www.npmjs.org/package/run-callback)
 [![status](https://travis-ci.org/zoubin/run-callback.svg?branch=master)](https://travis-ci.org/zoubin/run-callback)
+[![coverage](https://img.shields.io/coveralls/zoubin/run-callback.svg)](https://coveralls.io/github/zoubin/run-callback)
 [![dependencies](https://david-dm.org/zoubin/run-callback.svg)](https://david-dm.org/zoubin/run-callback)
 [![devDependencies](https://david-dm.org/zoubin/run-callback/dev-status.svg)](https://david-dm.org/zoubin/run-callback#info=devDependencies)
 
@@ -163,4 +164,55 @@ and that method will be treated as the `callback`.
 ### args
 
 The arguments following `callback` will be passed as arguments to `callback` when it is executed.
+
+
+## run.chain(callbacks, done)
+
+Chain [callback](#callback)s together.
+Values returned from the previous callback
+will be appended to the argument list of the next.
+
+### callbacks
+
+Type: `Array`
+
+### done
+
+Type: `Function`
+
+Signature: `done(err,...args)`
+
+```javascript
+var chain = require('run-callback').chain
+
+chain([
+  [function (v, cb) {
+    // 1
+    console.log(v)
+    process.nextTick(function () {
+      cb(null, 1, 2)
+    })
+  }, 1],
+  [function (a, b, c) {
+    // [3, 1, 2]
+    console.log([a, b, c])
+    return Promise.resolve([b, c])
+  }, 3],
+  function (a) {
+    // [1, 2]
+    console.log(a)
+    return [1, 2]
+  },
+  function (a, cb) {
+    // [1, 2]
+    console.log(a)
+    cb(null, 1, 2)
+  },
+], function (err, a, b) {
+  // [1, 2]
+  console.log([a, b])
+})
+
+
+```
 
