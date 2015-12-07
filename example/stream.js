@@ -1,27 +1,26 @@
 var run = require('..')
-var Stream = require('stream')
+var Readable = require('stream').Readable
 
-var res = []
-run(
-  [function (a, b) {
-    var rs = Stream.Readable({ objectMode: true })
-    var data = [a, b]
-    rs._read = function () {
-      if (data.length) {
-        this.push(data.pop())
-      } else {
-        this.push(null)
-      }
+var src = ['beep', '\n', 'boop']
+run(function () {
+  var stream = createStream(src)
+  stream.pipe(process.stdout)
+  return stream
+})
+.then(function () {
+  console.log('\n')
+  // `[]`
+  console.log(src)
+})
+
+function createStream(source) {
+  var rs = Readable()
+  rs._read = function () {
+    if (source.length) {
+      this.push(source.pop())
+    } else {
+      this.push(null)
     }
-    process.nextTick(function () {
-      rs.on('data', function (d) {
-        res.push(d)
-      })
-    })
-    return rs
-  }, 1, 2],
-  function () {
-    console.log('Expected:', [2, 1])
-    console.log('Actual:', res)
   }
-)
+  return rs
+}

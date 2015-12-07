@@ -1,96 +1,71 @@
-var test = require('tape')
-var run = require('..')
-var Stream = require('stream')
+var test = require('tap').test
+var thunkify = require('..').thunkify
+var Stream = require('./lib/stream')
 
-test('Readable', function(t) {
+test('readable', function(t) {
   t.plan(1)
 
-  var res = []
-  run(
-    [function (a, b) {
-      var rs = Stream.Readable({ objectMode: true })
-      var data = [a, b]
-      rs._read = function () {
-        if (data.length) {
-          this.push(data.pop())
-        } else {
-          this.push(null)
-        }
-      }
-      process.nextTick(function () {
-        rs.on('data', function (d) {
-          res.push(d)
-        })
-      })
-      return rs
-    }, 1, 2],
-    function () {
-      t.same(res, [2, 1])
-    }
-  )
+  var outputs = []
+  thunkify(function () {
+    var rs = Stream.Readable([1, 2])
+    var ws = Stream.Writable(outputs)
+    rs.pipe(ws)
+    return rs
+  })()
+  .then(function () {
+    t.same(outputs, [1, 2])
+  })
+
 })
 
-test('Writable', function(t) {
+test('writable', function(t) {
   t.plan(1)
 
-  var res = []
-  run(
-    [function (a, b) {
-      var ws = Stream.Writable({ objectMode: true })
-      ws._write = function (buf, _, next) {
-        process.nextTick(function () {
-          res.push(buf)
-          next()
-        })
-      }
-      process.nextTick(function () {
-        ws.write(a)
-        process.nextTick(function () {
-          ws.end(b)
-        })
-      })
-      return ws
-    }, 1, 2],
-    function () {
-      t.same(res, [1, 2])
-    }
-  )
+  var outputs = []
+  thunkify(function () {
+    var rs = Stream.Readable([1, 2])
+    var ws = Stream.Writable(outputs)
+    return rs.pipe(ws)
+  })()
+  .then(function () {
+    t.same(outputs, [1, 2])
+  })
+
 })
 
-test('Transform', function(t) {
+test('transform', function(t) {
   t.plan(1)
 
-  var res = []
-  run(
-    [function (a, b) {
-      var ts = Stream.Transform({ objectMode: true })
-      ts._transform = function (buf, _, next) {
-        process.nextTick(function () {
-          next(null, buf << 1)
-        })
-      }
-      var rs = Stream.Readable({ objectMode: true })
-      var data = [a, b]
-      rs._read = function () {
-        if (data.length) {
-          this.push(data.pop())
-        } else {
-          this.push(null)
-        }
-      }
-      var ws = Stream.Writable({ objectMode: true })
-      ws._write = function (buf, _, next) {
-        process.nextTick(function () {
-          res.push(buf)
-          next()
-        })
-      }
-      ts.pipe(ws)
-      return rs.pipe(ts)
-    }, 1, 2],
-    function () {
-      t.same(res, [4, 2])
-    }
-  )
+  var outputs = []
+  thunkify(function () {
+    var rs = Stream.Readable([1, 2])
+    var ws = Stream.Writable(outputs)
+    var tr = Stream.Transform(function (data) { return data + 1 })
+    rs.pipe(tr).pipe(ws)
+    return tr
+  })()
+  .then(function () {
+    t.same(outputs, [2, 3])
+  })
+
+})
+
+test('duplex', function(t) {
+  t.plan(1)
+
+  var outputs = []
+  var outputs2 = []
+  thunkify(function () {
+    var stream = Stream.Duplex(outputs2, [1, 2])
+    var ws = Stream.Writable(outputs)
+    stream.pipe(ws)
+    stream.write(3)
+    stream.end(4)
+    return stream
+  })()
+  .then(function () {
+    t.same(outputs, [1, 2, 3, 4])
+  })
+
 })
 
