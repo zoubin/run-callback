@@ -1,11 +1,11 @@
 # run-callback
-Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp/blob/master/docs/API.md#fn).
-
 [![version](https://img.shields.io/npm/v/run-callback.svg)](https://www.npmjs.org/package/run-callback)
 [![status](https://travis-ci.org/zoubin/run-callback.svg?branch=master)](https://travis-ci.org/zoubin/run-callback)
 [![coverage](https://img.shields.io/coveralls/zoubin/run-callback.svg)](https://coveralls.io/github/zoubin/run-callback)
 [![dependencies](https://david-dm.org/zoubin/run-callback.svg)](https://david-dm.org/zoubin/run-callback)
 [![devDependencies](https://david-dm.org/zoubin/run-callback/dev-status.svg)](https://david-dm.org/zoubin/run-callback#info=devDependencies)
+
+Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp/blob/master/docs/API.md#fn).
 
 The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/orchestrator/blob/master/lib/runTask.js).
 
