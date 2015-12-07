@@ -77,7 +77,7 @@ function createStream(source) {
 
 ```
 
-##### Accept one more argument than given
+##### Accept one more argument than declared
 
 ```javascript
 run(function (a, b, next) {
@@ -94,7 +94,7 @@ run(function (a, b, next) {
 
 ### run.thunkify(fn, context)
 
-Return a new function to run `fn` with arguments.
+Return a new function to run `fn` later with a list of arguments.
 
 ```javascript
 var task = run.thunkify(function (a, b, next) {
