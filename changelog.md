@@ -1,4 +1,12 @@
-<!-- de8cc42 1449481849000 -->
+<!-- 932a6b4 1449638202000 -->
+
+## [v3.1.0](https://github.com/zoubin/run-callback/commit/932a6b4) (2015-12-09)
+
+* [[`800e497`](https://github.com/zoubin/run-callback/commit/800e497)] Support custom runner
+
+* [[`97e5ee9`](https://github.com/zoubin/run-callback/commit/97e5ee9)] Update readme
+
+* [[`4d147c0`](https://github.com/zoubin/run-callback/commit/4d147c0)] CHANGELOG
 
 ## [v3.0.0](https://github.com/zoubin/run-callback/commit/de8cc42) (2015-12-07)
 
