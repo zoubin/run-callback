@@ -36,11 +36,11 @@ test('context', function(t) {
     },
   }
 
-  thunkify(function () {
+  run(ctx, function () {
     t.equal(this, ctx)
-  }, ctx)()
+  })
 
-  thunkify('fn', ctx)()
+  run(ctx, 'fn')
   .then(function (res) {
     t.equal(res[0], ctx)
   })

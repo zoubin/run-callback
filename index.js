@@ -1,57 +1,76 @@
 var eos = require('end-of-stream')
 var consume = require('stream-consume')
 
-exports = module.exports = function (cb) {
-  return thunkify(cb).apply(null, slice(arguments, 1))
+function Runner(opts) {
+  if (!(this instanceof Runner)) {
+    return new Runner(opts)
+  }
+  opts = opts || {}
+  // should handle functions returning a stream
+  this.stream = opts.stream !== false
+  // should handle functions returning a promise
+  this.promise = opts.promise !== false
+  // should handle asynchronous functions accepting a callback
+  this.async = opts.async !== false
 }
 
-exports.thunkify = thunkify
-
-function thunkify(fn, ctx) {
-  if (typeof fn === 'string') {
-    fn = ctx[fn]
-  }
+Runner.prototype.thunkify = function(fn) {
+  var self = this
 
   return function () {
+    var ctx = this
     var args = slice(arguments)
 
-    // For async callbacks,
+    // For async functions,
     // the number of arguments provided should be at least one less than declared.
-    var maybeAsync = fn.length > args.length
+    var async = self.async && fn.length > args.length
 
     return new Promise(function (resolve, reject) {
       function done(err) {
-        if (err) {
-          return reject(err)
-        }
-        resolve(normalizeResult(slice(arguments, 1)))
+        if (err) return reject(err)
+        resolve(self.normalize(slice(arguments, 1)))
       }
 
-      var r = fn.apply(ctx, maybeAsync ? args.concat(done) : args)
-
-      if (isPromise(r)) {
-        r.then(done.bind(null, null), done)
-        return
+      if (async) {
+        args = args.concat(done)
       }
 
-      if (isStream(r)) {
-        eos(r, {
-          error: true,
-          readable: r.readable,
-          writable: r.writable && !r.readable,
-        }, function (err) {
-          done(err)
-        })
-        consume(r)
-        return
+      var r = fn.apply(ctx, args)
+
+      if (self.promise && isPromise(r)) {
+        return r.then(done.bind(null, null), done)
       }
 
-      if (!maybeAsync) {
-        done(null, r)
+      if (self.stream && isStream(r)) {
+        return self.eos(r, done)
       }
 
+      if (!async) done(null, r)
     })
   }
+}
+
+Runner.prototype.eos = function(stream, done) {
+  eos(stream, {
+    error: true,
+    readable: stream.readable,
+    writable: stream.writable && !stream.readable,
+  }, function (err) {
+    done(err)
+  })
+  consume(stream)
+}
+
+Runner.prototype.normalize = function(res) {
+  var top
+  while (res.length) {
+    top = res.pop()
+    if (typeof top !== 'undefined') {
+      res.push(top)
+      break
+    }
+  }
+  return res
 }
 
 function isPromise(o) {
@@ -66,15 +85,19 @@ function slice(o, from, to) {
   return Array.prototype.slice.call(o, from, to)
 }
 
-function normalizeResult(res) {
-  var top
-  while (res.length) {
-    top = res.pop()
-    if (typeof top !== 'undefined') {
-      res.push(top)
-      break
-    }
+var runner = new Runner()
+var thunkify = runner.thunkify.bind(runner)
+
+exports = module.exports = function (ctx, cb) {
+  if (typeof ctx === 'function') {
+    return thunkify(ctx).apply(null, slice(arguments, 1))
   }
-  return res
+  if (typeof cb === 'string') {
+    cb = ctx[cb]
+  }
+  return thunkify(cb).apply(ctx, slice(arguments, 2))
 }
+
+exports.thunkify = thunkify
+exports.Runner = Runner
 

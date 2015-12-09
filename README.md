@@ -7,8 +7,6 @@
 
 Run async or sync callbacks, such as [gulp tasks](https://github.com/gulpjs/gulp/blob/master/docs/API.md#fn).
 
-The main ideas are borrowed from [orchestrator](https://github.com/orchestrator/orchestrator/blob/master/lib/runTask.js).
-
 ## Usage
 
 ```javascript
@@ -92,7 +90,7 @@ run(function (a, b, next) {
 
 ```
 
-### run.thunkify(fn, context)
+### run.thunkify(fn)
 
 Return a new function to run `fn` later with a list of arguments.
 
@@ -107,6 +105,91 @@ task(2, 1).then(function (res) {
   // `[3, 1]`
   console.log(res)
 })
+
+```
+
+### Runner = run.Runner
+
+`var runner = Runner(opts)`
+
+Create a custom `Runner` instance to run callbacks.
+
+#### opts
+
+By default, callbacks returning a stream is thought to be in progress before the stream ends.
+However, if `opts.stream` is `false`,
+callbacks returning a stream wil be treated as synchronous.
+
+If `opts.promise` is `false`,
+callbacks returning a promise will be treated as synchronous.
+
+If `opts.async` is `false`,
+callbacks can only be made asynchronous
+by returning a promise (when `opts.promise` is `true`),
+or returning a stream (when `opts.stream` is `true`).
+
+```javascript
+var Stream = require('stream')
+var Readable = Stream.Readable
+var Writable = Stream.Writable
+
+;(function handleStream() {
+  var runner = require('..').Runner({ stream: true })
+
+  var outputs = []
+  var rs = createReadable([1, 2])
+
+  return runner.thunkify(function () {
+    setTimeout(function() {
+      var ws = createWritable(outputs)
+      rs.pipe(ws)
+    }, 0)
+    return rs
+  })().then(function (res) {
+    // []
+    console.log(res)
+  })
+})()
+.then(function doNotHandleStream() {
+  var runner = require('..').Runner({ stream: false })
+
+  var outputs = []
+  var rs = createReadable([1, 2])
+
+  runner.thunkify(function () {
+    setTimeout(function() {
+      var ws = createWritable(outputs)
+      rs.pipe(ws)
+    }, 0)
+    return rs
+  })().then(function (res) {
+    // true
+    console.log(res[0] === rs)
+  })
+})
+
+function createReadable(input) {
+  var stream = Readable({ objectMode: true })
+  var i = 0
+  stream._read = function () {
+    if (i < input.length) {
+      this.push(input[i++])
+    } else {
+      this.push(null)
+    }
+  }
+  return stream
+}
+
+function createWritable(output) {
+  var stream = Writable({ objectMode: true })
+  var i = 0
+  stream._write = function (data, _, next) {
+    output.push(data)
+    next()
+  }
+  return stream
+}
 
 ```
 
